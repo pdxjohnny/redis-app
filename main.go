@@ -2,12 +2,14 @@ package main
 
 import (
     "fmt"
+    "strings"
     "net/http"
+    "encoding/json"
 
     "gopkg.in/redis.v3"
 )
 
-var client *redis.Client
+var client * redis.Client
 
 func redis_init() {
     client = redis.NewClient(&redis.Options{
@@ -15,45 +17,50 @@ func redis_init() {
         Password: "", // no password set
         DB:       0,  // use default DB
     })
-
-    pong, err := client.Ping().Result()
-    fmt.Println(pong, err)
-    // Output: PONG <nil>
 }
 
-func redis_test(w http.ResponseWriter) {
-    err := client.Set("key", "value", 0).Err()
-    if err != nil {
-        panic(err)
-    }
-
-    val, err := client.Get("key").Result()
-    if err != nil {
-        panic(err)
-    }
-    fmt.Fprintf(w, "key", val)
-
-    val2, err := client.Get("key2").Result()
+func redis_get(key string) []byte {
+    value, err := client.Get(key).Result()
     if err == redis.Nil {
-        fmt.Fprintf(w, "key2 does not exists")
+        return nil
     } else if err != nil {
         panic(err)
     } else {
-        fmt.Fprintf(w, "key2", val2)
+        fmt.Println(key, value)
     }
-    // Output: key value
-    // key2 does not exists
+    b, err := json.Marshal(value)
+    return b
 }
 
-func handler(w http.ResponseWriter, r *http.Request) {
-    // fmt.Fprintf(w, "Hi there, I love %s!", r.URL.Path[1:])
-    redis_test(w)
-    fmt.Println("Finished")
+func redis_set(key string, value interface{}) bool {
+    err := client.Set(key, value, 0).Err()
+    if err != nil {
+        panic(err)
+        return false
+    }
+    return true
+}
+
+func set_handler(w http.ResponseWriter, r *http.Request) {
+    path := strings.Split(r.URL.Path, "/")
+    key := path[len(path) - 2]
+    value := path[len(path) - 1]
+    redis_set(key, value)
+    fmt.Fprintf(w, "%v\n", string(redis_get(key)))
+}
+
+func get_handler(w http.ResponseWriter, r *http.Request) {
+    path := strings.Split(r.URL.Path, "/")
+    key := path[len(path) - 1]
+    fmt.Fprintf(w, "%v\n", string(redis_get(key)))
+    return
 }
 
 func main() {
     redis_init()
-    fmt.Println("Redis initialized")
-    http.HandleFunc("/", handler)
+    fmt.Println("Redis connection initialized")
+    http.HandleFunc("/", get_handler)
+    http.HandleFunc("/set/", set_handler)
     http.ListenAndServe(":5000", nil)
+    fmt.Println("Web Server Running")
 }
