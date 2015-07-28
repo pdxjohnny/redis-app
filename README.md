@@ -1,7 +1,9 @@
-Docker Go Base
+Redis App
 ---
 
-This repo is meant to be used as a starting point for go projects
+This is a go application which uses redis
+
+This project was built off of [pdxjohnny/go-starter](https://github.com/pdxjohnny/go-starter)
 
 It uses docker to compile the binaries and the main Dockerfile adds the linux
 binary to the busybox image to create an extremely small final image
@@ -19,14 +21,6 @@ Running
 ```bash
 ./build/redis-app_linux-amd64
 docker run --rm -ti redis-app
-```
-
-Changing The Name
----
-
-
-```bash
-./script/change-name $GITHUB_USERNAME $PROJECT_NAME
 ```
 
 
