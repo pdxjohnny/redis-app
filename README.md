@@ -20,9 +20,8 @@ Running
 
 ```bash
 ./build/redis-app_linux-amd64
-docker run --rm -ti redis-app
+docker run --rm -ti -p 5000:5000 redis-app
 ```
 
 
 - John Andersen
-

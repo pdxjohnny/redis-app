@@ -1,4 +1,3 @@
-FROM ubu
-COPY ./build/redis-app_linux-amd64 /app
+FROM busybox
+COPY ./build/redis-app_linux-386 /app
 CMD ["/app"]
-

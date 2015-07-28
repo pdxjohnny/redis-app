@@ -6,4 +6,3 @@ web:
    - redis
 redis:
   image: redis
-
