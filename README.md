@@ -17,8 +17,8 @@ Running
 ---
 
 ```bash
-./build/default_app_name_linux-amd64
-docker run --rm -ti default_app_name
+./build/redis-app_linux-amd64
+docker run --rm -ti redis-app
 ```
 
 Changing The Name
