@@ -4,7 +4,6 @@ import (
     "fmt"
     "strings"
     "net/http"
-    "encoding/json"
 
     "gopkg.in/redis.v3"
 )
@@ -19,17 +18,14 @@ func redis_init() {
     })
 }
 
-func redis_get(key string) []byte {
+func redis_get(key string) string {
     value, err := client.Get(key).Result()
     if err == redis.Nil {
-        return nil
+        return ""
     } else if err != nil {
         panic(err)
-    } else {
-        fmt.Println(key, value)
     }
-    b, err := json.Marshal(value)
-    return b
+    return value
 }
 
 func redis_set(key string, value interface{}) bool {
@@ -46,13 +42,13 @@ func set_handler(w http.ResponseWriter, r *http.Request) {
     key := path[len(path) - 2]
     value := path[len(path) - 1]
     redis_set(key, value)
-    fmt.Fprintf(w, "%v\n", string(redis_get(key)))
+    fmt.Fprintf(w, "%s", string(redis_get(key)))
 }
 
 func get_handler(w http.ResponseWriter, r *http.Request) {
     path := strings.Split(r.URL.Path, "/")
     key := path[len(path) - 1]
-    fmt.Fprintf(w, "%v\n", string(redis_get(key)))
+    fmt.Fprintf(w, "%s", string(redis_get(key)))
     return
 }
 
